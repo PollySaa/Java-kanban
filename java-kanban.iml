@@ -52,5 +52,34 @@
         <SOURCES />
       </library>
     </orderEntry>
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES />
+        <JAVADOC />
+        <SOURCES>
+          <root url="file://C:/gson-gson-parent-2.11.0/examples/android-proguard-example/src" />
+          <root url="file://C:/gson-gson-parent-2.11.0/extras/src/main/java" />
+          <root url="file://C:/gson-gson-parent-2.11.0/extras/src/test/java" />
+          <root url="file://C:/gson-gson-parent-2.11.0/graal-native-image-test/src/test/java" />
+          <root url="file://C:/gson-gson-parent-2.11.0/gson/src/main/java" />
+          <root url="file://C:/gson-gson-parent-2.11.0/gson/src/main/java-templates" />
+          <root url="file://C:/gson-gson-parent-2.11.0/gson/src/test/java" />
+          <root url="file://C:/gson-gson-parent-2.11.0/metrics/src/main/java" />
+          <root url="file://C:/gson-gson-parent-2.11.0/proto/src/main/java" />
+          <root url="file://C:/gson-gson-parent-2.11.0/proto/src/test/java" />
+          <root url="file://C:/gson-gson-parent-2.11.0/shrinker-test/src/main/java" />
+          <root url="file://C:/gson-gson-parent-2.11.0/shrinker-test/src/test/java" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library" exported="">
+      <library>
+        <CLASSES>
+          <root url="jar://C:/gson-2.10.1.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
   </component>
 </module>
