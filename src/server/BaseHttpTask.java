@@ -35,9 +35,13 @@ abstract class BaseHttpTask extends BaseHttpHandler {
     }
 
     abstract void handleAll(HttpExchange exchange) throws IOException;
+
     abstract void handleById(HttpExchange exchange) throws IOException;
+
     abstract void handleAddOrUpdate(HttpExchange exchange) throws IOException;
+
     abstract void handleRemove(HttpExchange exchange) throws IOException;
+
     abstract void handleSubtaskOfEpic(HttpExchange exchange) throws IOException;
 
 
