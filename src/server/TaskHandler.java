@@ -50,7 +50,6 @@ public class TaskHandler extends BaseHttpTask {
     void handleAddOrUpdate(HttpExchange exchange) throws IOException {
         try (InputStream input = exchange.getRequestBody()) {
             Optional<Task> optionalTask = parseTask(input);
-            
             if (optionalTask.isEmpty()) {
                 sendNotFound(exchange);
                 return;
