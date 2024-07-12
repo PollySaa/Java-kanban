@@ -48,7 +48,7 @@ public class EpicHandler extends BaseHttpTask {
 
     @Override
     void handleAddOrUpdate(HttpExchange exchange) throws IOException {
-        try(InputStream input = exchange.getRequestBody()) {
+        try (InputStream input = exchange.getRequestBody()) {
             Optional<Epic> optionalEpic = parseEpic(input);
 
             if (optionalEpic.isEmpty()) {
