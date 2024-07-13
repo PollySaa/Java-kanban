@@ -13,6 +13,9 @@ import java.util.Optional;
 public class BaseHttpHandler implements HttpHandler {
     protected final Gson gson;
     protected TaskManager taskManager;
+    private final String contentType = "Content-Type";
+    private final String json = "application/json;charset=utf-8";
+    private String response;
 
     public BaseHttpHandler(Gson gson) {
         this.gson = gson;
@@ -28,36 +31,36 @@ public class BaseHttpHandler implements HttpHandler {
 
     }
 
-    protected void sendText(HttpExchange h, String text) throws IOException {
+    protected void sendText(HttpExchange exchange, String text) throws IOException {
         byte[] resp = text.getBytes(StandardCharsets.UTF_8);
-        h.getResponseHeaders().add("Content-Type", "application/json;charset=utf-8");
-        h.sendResponseHeaders(200, resp.length);
-        h.getResponseBody().write(resp);
-        h.close();
+        exchange.getResponseHeaders().add(contentType, json);
+        exchange.sendResponseHeaders(200, resp.length);
+        exchange.getResponseBody().write(resp);
+        exchange.close();
     }
 
-    protected void sendNotFound(HttpExchange h) throws IOException {
-        String response = "{\"status\":\"error\",\"message\":\"object not found\"}";
+    protected void sendNotFound(HttpExchange exchange) throws IOException {
+        response = "{\"status\":\"error\",\"message\":\"object not found\"}";
         byte[] resp = response.getBytes(StandardCharsets.UTF_8);
-        h.getResponseHeaders().add("Content-Type", "application/json;charset=utf-8");
-        h.sendResponseHeaders(404, resp.length);
-        h.getResponseBody().write(resp);
-        h.close();
+        exchange.getResponseHeaders().add(contentType, json);
+        exchange.sendResponseHeaders(404, resp.length);
+        exchange.getResponseBody().write(resp);
+        exchange.close();
     }
 
-    protected void sendHasInteractions(HttpExchange h) throws IOException {
-        String response = "{\"status\":\"error\",\"message\":\"task has interactions\"}";
+    protected void sendHasInteractions(HttpExchange exchange) throws IOException {
+        response = "{\"status\":\"error\",\"message\":\"task has interactions\"}";
         byte[] resp = response.getBytes(StandardCharsets.UTF_8);
-        h.getResponseHeaders().add("Content-Type", "application/json;charset=utf-8");
-        h.sendResponseHeaders(406, resp.length);
-        h.getResponseBody().write(resp);
-        h.close();
+        exchange.getResponseHeaders().add(contentType, json);
+        exchange.sendResponseHeaders(406, resp.length);
+        exchange.getResponseBody().write(resp);
+        exchange.close();
     }
 
     protected void writeResponse(Object body, HttpExchange exchange) throws IOException {
         String responseJson = gson.toJson(body);
         byte[] responseBytes = responseJson.getBytes(StandardCharsets.UTF_8);
-        exchange.getResponseHeaders().add("Content-Type", "application/json;charset=utf-8");
+        exchange.getResponseHeaders().add(contentType, json);
         exchange.sendResponseHeaders(200, responseBytes.length);
         exchange.getResponseBody().write(responseBytes);
         exchange.close();
