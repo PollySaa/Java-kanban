@@ -230,5 +230,4 @@ class InMemoryTaskManagerTest {
         assertEquals(tasks2, tasks1);
 
     }
-
 }

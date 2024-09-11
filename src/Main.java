@@ -2,7 +2,6 @@ import components.Epic;
 import components.Status;
 import components.Subtask;
 import components.Task;
-import service.HistoryManager;
 import service.Managers;
 import service.TaskManager;
 
@@ -42,6 +41,7 @@ public class Main {
         System.out.println(manager.getAllTasksById(2));
         System.out.println(manager.getAllSubtasksById(4));
         System.out.println(manager.getAllEpicsById(3));
+        System.out.println(manager.getAllTasksById(2));
 
 
         System.out.println("ИСТОРИЯ");
@@ -70,10 +70,13 @@ public class Main {
 
         System.out.println();
         System.out.println("УДАЛЕНИЕ");
-        manager.removeTaskById(1);
+        manager.removeTaskById(2);
         System.out.println(manager.getAllTask());
         manager.removeEpicById(3);
         System.out.println(manager.getAllEpic());
         System.out.println(manager.getAllSubtask());
+
+        System.out.println("ИСТОРИЯ");
+        System.out.println(manager.getHistoryTasks());
     }
 }
