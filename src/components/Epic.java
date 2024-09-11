@@ -1,5 +1,7 @@
 package components;
 
+import service.Type;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -8,6 +10,10 @@ public class Epic extends Task {
 
     public Epic(String taskName, String taskDescription) {
         super(taskName, taskDescription);
+    }
+
+    public Epic(Integer id, Type type, String taskName, Status status, String taskDescription) {
+        super(id, type, taskName, status, taskDescription);
     }
 
     public void addSubtasks(Subtask subtask) {
@@ -58,12 +64,7 @@ public class Epic extends Task {
 
     @Override
     public String toString() {
-        return "Epic{" +
-                "taskName='" + getTaskName() + '\'' +
-                ", taskDescription='" + getTaskDescription() + '\'' +
-                ", status=" + getStatus() +
-                ", id=" + getId() +
-                '}' + '\n';
+        return getId() + "," + getType() + "," + getTaskName() + "," + getStatus() + "," + getTaskDescription();
     }
 }
 

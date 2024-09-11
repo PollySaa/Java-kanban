@@ -1,10 +1,17 @@
 package components;
 
+import service.Type;
+
 public class Subtask extends Task {
     private final Integer idEpic;
 
     public Subtask(String taskName, String taskDescription, Integer idEpic) {
         super(taskName, taskDescription);
+        this.idEpic = idEpic;
+    }
+
+    public Subtask(Integer id, Type type, String taskName, Status status, String taskDescription, Integer idEpic) {
+        super(id, type, taskName, status, taskDescription);
         this.idEpic = idEpic;
     }
 
@@ -14,13 +21,8 @@ public class Subtask extends Task {
 
     @Override
     public String toString() {
-        return "Subtask{" +
-                "taskName='" + getTaskName() + '\'' +
-                ", taskDescription='" + getTaskDescription() + '\'' +
-                ", status=" + getStatus() +
-                ", id=" + getId() +
-                ", idEpic=" + getIdEpic() +
-                '}' + '\n';
+        return getId() + "," + getType() + "," + getTaskName() + "," + getStatus() + "," + getTaskDescription() + "," +
+                getIdEpic();
     }
 }
 
