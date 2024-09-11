@@ -53,5 +53,10 @@ public interface TaskManager {
     boolean equals(Object o);
 
     int hashCode();
+
+    ArrayList<Task> getPrioritizedTasks();
+
+    void epicDateTime(Epic epic);
+
 }
 

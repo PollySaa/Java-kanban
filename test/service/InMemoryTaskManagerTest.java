@@ -4,10 +4,14 @@ import components.Epic;
 import components.Status;
 import components.Subtask;
 import components.Task;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -16,30 +20,33 @@ class InMemoryTaskManagerTest {
     Task task1;
     Task task2;
     Epic epic1;
-    Epic epic2;
     Subtask subtask1;
     Subtask subtask2;
+    LocalDateTime startTime1;
+    LocalDateTime startTime2;
 
     @BeforeEach
     public void beforeEach() {
         manager = Managers.getDefault();
 
-        task1 = new Task("Задача1", "Пусто");
-        manager.addTask(task1);
+        startTime1 = LocalDateTime.of(2024, 6, 28, 1, 0);
+        startTime2 = LocalDateTime.of(2024, 6, 28, 1, 10);
 
-        task2 = new Task("Задача2", "Пусто");
+        task1 = new Task(Type.TASK, "Task1", Status.NEW, "Empty", startTime1,
+                Duration.ofMinutes(9));
+        task2 = new Task(Type.TASK, "Task2", Status.NEW, "Empty", startTime2,
+                Duration.ofMinutes(5));
+        manager.addTask(task1);
         manager.addTask(task2);
 
-        epic1 = new Epic("Эпик1", "Пусто");
+        epic1 = new Epic(Type.EPIC,"Epic1", Status.NEW, "Empty");
         manager.addEpic(epic1);
 
-        epic2 = new Epic("Эпик2", "Пусто");
-        manager.addEpic(epic2);
-
-        subtask1 = new Subtask("Подзадача1", "Пусто", epic1.getId());
+        subtask1 = new Subtask(Type.SUBTASK, "Subtask1", Status.NEW, "Empty",
+                startTime1.plusMinutes(60), Duration.ofMinutes(9), 3);
+        subtask2 = new Subtask(Type.SUBTASK, "Subtask2", Status.NEW, "Empty",
+                startTime2.plusMinutes(60), Duration.ofMinutes(5), 3);
         manager.addSubtask(subtask1);
-
-        subtask2 = new Subtask("Подзадача2", "Пусто", epic1.getId());
         manager.addSubtask(subtask2);
     }
 
@@ -59,9 +66,8 @@ class InMemoryTaskManagerTest {
 
     @Test
     public void getAllEpic() {
-        assertEquals(2, manager.getAllEpic().size());
-        assertEquals(epic1, manager.getAllEpic().get(0));
-        assertEquals(epic2, manager.getAllEpic().get(1));
+        assertEquals(1, manager.getAllEpic().size());
+        assertEquals(epic1, manager.getAllEpic().getFirst());;
     }
 
     @Test
@@ -92,9 +98,19 @@ class InMemoryTaskManagerTest {
     }
 
     @Test
+    public void getAllTasksByIdWithWrongId() {
+        assertNull(manager.getAllTasksById(6));
+    }
+
+    @Test
     public void getAllSubtasksById() {
-        assertEquals(subtask1, manager.getAllSubtasksById(5));
-        assertEquals(subtask2, manager.getAllSubtasksById(6));
+        assertEquals(subtask1, manager.getAllSubtasksById(4));
+        assertEquals(subtask2, manager.getAllSubtasksById(5));
+    }
+
+    @Test
+    public void getAllSubtasksByIdWithWrongId() {
+        assertNull(manager.getAllSubtasksById(8));
     }
 
     @Test
@@ -103,10 +119,20 @@ class InMemoryTaskManagerTest {
     }
 
     @Test
+    public void getAllEpicsByIdWithWrongId() {
+        assertNull(manager.getAllEpicsById(8));
+    }
+
+    @Test
     public void addTask() {
         assertEquals(2, manager.getAllTask().size());
         assertEquals(task1, manager.getAllTask().getFirst());
         assertEquals(task2, manager.getAllTask().getLast());
+    }
+
+    @Test
+    public void addTaskNull() {
+        assertDoesNotThrow(() -> manager.addTask(null));
     }
 
     @Test
@@ -119,10 +145,19 @@ class InMemoryTaskManagerTest {
     }
 
     @Test
+    public void addSubtaskNull() {
+        assertDoesNotThrow(() -> manager.addSubtask(null));
+    }
+
+    @Test
     public void addEpic() {
-        assertEquals(2, manager.getAllEpic().size());
+        assertEquals(1, manager.getAllEpic().size());
         assertEquals(epic1, manager.getAllEpic().getFirst());
-        assertEquals(epic2, manager.getAllEpic().getLast());
+    }
+
+    @Test
+    public void addEpicNull() {
+        assertDoesNotThrow(() -> manager.addEpic(null));
     }
 
     @Test
@@ -139,6 +174,11 @@ class InMemoryTaskManagerTest {
     }
 
     @Test
+    public void updateTaskNull() {
+        assertDoesNotThrow(() -> manager.updateTask(null));
+    }
+
+    @Test
     public void updateSubtask() {
         subtask1.setStatus(Status.IN_PROGRESS);
         manager.updateSubtask(subtask1);
@@ -149,6 +189,11 @@ class InMemoryTaskManagerTest {
         assertEquals(2, manager.getAllSubtask().size());
         assertEquals(subtask1, manager.getAllSubtask().getFirst());
         assertEquals(subtask2, manager.getAllSubtask().getLast());
+    }
+
+    @Test
+    public void updateSubtaskNull() {
+        assertDoesNotThrow(() -> manager.updateSubtask(null));
     }
 
     @Test
@@ -177,6 +222,11 @@ class InMemoryTaskManagerTest {
     }
 
     @Test
+    public void updateEpicNull() {
+        assertDoesNotThrow(() -> manager.updateEpic(null));
+    }
+
+    @Test
     public void removeTaskById() {
         assertEquals(2, manager.getAllTask().size());
 
@@ -200,10 +250,9 @@ class InMemoryTaskManagerTest {
     public void removeEpicById() {
         assertEquals(subtask1, epic1.getSubtasks().getFirst());
         assertEquals(subtask2, epic1.getSubtasks().getLast());
-        assertEquals(2, manager.getAllEpic().size());
+        assertEquals(1, manager.getAllEpic().size());
 
         manager.removeEpicById(epic1.getId());
-        manager.removeEpicById(epic2.getId());
 
         assertEquals(0, manager.getAllEpic().size());
     }
@@ -218,7 +267,7 @@ class InMemoryTaskManagerTest {
     public void getHistoryTasks() {
         manager.getAllTasksById(1);
         manager.getAllEpicsById(3);
-        manager.getAllSubtasksById(5);
+        manager.getAllSubtasksById(4);
 
         ArrayList<Task> tasks1 = new ArrayList<>();
         tasks1.add(task1);
@@ -228,6 +277,38 @@ class InMemoryTaskManagerTest {
         ArrayList<Task> tasks2 = manager.getHistoryTasks();
 
         assertEquals(tasks2, tasks1);
+    }
 
+    @Test
+    public void epicStartTimeDurationAndEndTimeShouldChangeWithSubTasks() {
+        manager.epicDateTime(epic1);
+        assertEquals(startTime1.plusMinutes(60), epic1.getStartTime());
+        assertEquals(startTime2.plusMinutes(60).plus(Duration.ofMinutes(5)), epic1.getEndTime());
+        assertEquals(Duration.ofMinutes(14), epic1.getDuration());
+    }
+
+    @Test
+    public void updateSubTaskWithCheck() {
+        Subtask subtask = new Subtask(4, Type.SUBTASK, "Subtask1", "Empty", Status.NEW,
+                startTime1.plusMinutes(60), Duration.ofMinutes(9), 3);
+        manager.updateSubtask(subtask);
+        Assertions.assertEquals(startTime1.plusMinutes(60),
+                manager.getAllSubtasksById(4).getStartTime());
+    }
+
+    @Test
+    public void updateSubTaskWithNull() {
+        manager.updateSubtask(null);
+        Assertions.assertEquals(subtask1, manager.getAllSubtasksById(4));
+    }
+
+    @Test
+    public void getPrioritizedTasks() {
+        List<Task> list1 = manager.getPrioritizedTasks();
+        assertEquals(4, list1.size());
+        assertEquals(task1, list1.get(0));
+        assertEquals(task2, list1.get(1));
+        assertEquals(subtask1, list1.get(2));
+        assertEquals(subtask2, list1.get(3));
     }
 }

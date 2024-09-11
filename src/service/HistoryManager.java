@@ -15,4 +15,6 @@ public interface HistoryManager {
     void linkLast(Task task);
 
     void removeNode(Node node);
+
+    void clear();
 }

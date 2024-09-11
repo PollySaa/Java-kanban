@@ -9,7 +9,10 @@ import exceptions.ManagerSaveException;
 import java.io.*;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.List;
 
 public class FileBackedTaskManager extends InMemoryTaskManager implements TaskManager {
     Path path;
@@ -20,7 +23,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager implements TaskMa
     }
 
     public void save() {
-        String header = "id,type,name,status,description,epic" + "\n";
+        String header = "id,type,name,status,description,epic,startTime,duration,endTime" + "\n";
         try (FileWriter fileRecord = new FileWriter(path.toString())) {
             fileRecord.write(header);
             for (Integer key : tasks.keySet()) {
@@ -64,20 +67,53 @@ public class FileBackedTaskManager extends InMemoryTaskManager implements TaskMa
                 switch (task.getType()) {
                     case TASK:
                         tasks.put(task.getId(), task);
+                        prioritizedTasks.add(task);
                         break;
                     case EPIC:
                         Epic epic = (Epic) task;
+                        if (epic.getStartTime() != null) {
+                            epic.setEndTime(epic.getStartTime().plus(epic.getDuration()));
+                        }
                         epics.put(epic.getId(), epic);
                         break;
                     case SUBTASK:
                         Subtask subtask = (Subtask) task;
-                        subtasks.put(subtask.getId(), subtask);
+                        subtasks.put(task.getId(), subtask);
+                        prioritizedTasks.add(task);
+                        Epic e = epics.get(subtasks.get(subtask.getId()).getIdEpic());
+                        e.addSubtasks(subtask);
                         break;
                 }
             }
+
+            String line = reader.readLine();
+            if (line != null && !line.isEmpty()) {
+                List<Integer> list = historyFromString(line);
+                for (Integer id : list) {
+                    if (tasks.containsKey(id)) {
+                        historyManager.add(tasks.get(id));
+                    }
+                    if (epics.containsKey(id)) {
+                        historyManager.add(epics.get(id));
+                    }
+                    if (subtasks.containsKey(id)) {
+                        historyManager.add(subtasks.get(id));
+                    }
+                }
+            }
+
         } catch (IOException e) {
             throw new ManagerSaveException("Произошла ошибка чтения из файла", e);
         }
+    }
+
+    private static List<Integer> historyFromString(String value) {
+        String[] split = value.split(",");
+        List<Integer> list = new ArrayList<>();
+        for (int i = 0; i < split.length; i++) {
+            list.add(Integer.valueOf(split[i]));
+        }
+        return list;
     }
 
     public static Task fromString(String value) {
@@ -88,14 +124,26 @@ public class FileBackedTaskManager extends InMemoryTaskManager implements TaskMa
         Task task;
         switch (type) {
             case TASK:
-                task = new Task(id, type, parts[2], status, parts[4]);
+                task = new Task(id, type, parts[2], status, parts[4], LocalDateTime.parse(parts[5]),
+                        Duration.parse(parts[6]));
                 break;
             case EPIC:
                 task = new Epic(id, type, parts[2], status, parts[4]);
+                if (!parts[5].equals("null")) {
+                    task.setStartTime(LocalDateTime.parse(parts[5]));
+                } else {
+                    task.setStartTime(null);
+                }
+                if (!parts[7].equals("null")) {
+                    task.setDuration(Duration.parse(parts[6]));
+                } else {
+                    task.setDuration(null);
+                }
                 break;
             case SUBTASK:
-                int epicId = Integer.parseInt(parts[5]);
-                task = new Subtask(id, type, parts[2], status, parts[4], epicId);
+                int epicId = Integer.parseInt(parts[7]);
+                task = new Subtask(id, type, parts[2], parts[4], status, LocalDateTime.parse(parts[5]),
+                        Duration.parse(parts[6]), epicId);
                 break;
             default:
                 throw new ManagerSaveException("Неизвестный тип объекта " + type);

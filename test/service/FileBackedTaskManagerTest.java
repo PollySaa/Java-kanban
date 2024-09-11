@@ -7,7 +7,6 @@ import components.Task;
 import exceptions.ManagerSaveException;
 import org.junit.jupiter.api.*;
 
-
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -15,6 +14,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 import static org.junit.Assert.*;
 import static service.FileBackedTaskManager.loadFromFile;
@@ -41,21 +43,24 @@ class FileBackedTaskManagerTest {
 
     @Test
     void saveTasks() throws IOException {
-        Task task = new Task(1, Type.TASK, "Task1", Status.NEW, "empty");
-        taskManager.addTask(task);
+        LocalDateTime startTime = LocalDateTime.of(2024, 6, 26, 1, 0);
+        Task task1 = new Task(1, Type.TASK, "Task1", Status.NEW, "Empty", startTime,
+                Duration.ofMinutes(9));
+        taskManager.addTask(task1);
 
-        Epic epic = new Epic(2, Type.EPIC, "Epic1", Status.NEW, "empty");
-        taskManager.addEpic(epic);
+        Epic epic1 = new Epic(2, Type.EPIC,"Epic1", Status.NEW, "Empty");
+        taskManager.addEpic(epic1);
 
-        Subtask subtask = new Subtask(3, Type.SUBTASK, "Subtask1", Status.NEW, "empty",
-                2);
-        taskManager.addSubtask(subtask);
+        Subtask subtask1 = new Subtask(3, Type.SUBTASK, "Subtask1", "Empty", Status.NEW,
+                startTime.plusMinutes(60), Duration.ofMinutes(9), 2);
+        taskManager.addSubtask(subtask1);
 
         Assertions.assertTrue(Files.exists(somePath));
 
         String lineFromFile = Files.readString(Paths.get(somePath.toUri()));
-        String line = "id,type,name,status,description,epic" + "\n" + "1,TASK,Task1,NEW,empty" + "\n" + "2,EPIC," +
-                "Epic1,NEW,empty" + "\n" + "3,SUBTASK,Subtask1,NEW,empty,2" + "\n";
+        String line = "id,type,name,status,description,epic,startTime,duration,endTime" + "\n" +
+                "1,TASK,Task1,NEW,Empty,2024-06-26T01:00,PT9M" + "\n" + "2,EPIC,Epic1,NEW,Empty,null,null,null" + "\n" +
+                "3,SUBTASK,Subtask1,NEW,Empty,2024-06-26T02:00,PT9M,2" + "\n";
         Assertions.assertEquals(line, lineFromFile);
     }
 
@@ -97,34 +102,48 @@ class FileBackedTaskManagerTest {
 
     @Test
     void fromStringTaskTest() {
-        String taskString = "1,TASK,Task1,NEW,empty";
+        String taskString = "1,TASK,Task1,NEW,Empty,2024-06-26T01:00,PT9M";
         Task task = FileBackedTaskManager.fromString(taskString);
         Assertions.assertEquals(1, task.getId());
         Assertions.assertEquals(Type.TASK, task.getType());
         Assertions.assertEquals("Task1", task.getTaskName());
         Assertions.assertEquals(Status.NEW, task.getStatus());
-        Assertions.assertEquals("empty", task.getTaskDescription());
+        Assertions.assertEquals("Empty", task.getTaskDescription());
+
+        LocalDateTime expectedStartTime = LocalDateTime.parse("2024-06-26T01:00",
+                DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+        LocalDateTime actualStartTime = task.getStartTime();
+        Assertions.assertEquals(expectedStartTime, actualStartTime);
+
+        Assertions.assertEquals("PT9M", task.getDuration().toString());
     }
 
     @Test
     void fromStringEpicTest() {
-        String taskString = "1,EPIC,Epic1,NEW,empty";
+        String taskString = "2,EPIC,Epic1,NEW,Empty,null,null,null";
         Task epic = FileBackedTaskManager.fromString(taskString);
-        Assertions.assertEquals(1, epic.getId());
+        Assertions.assertEquals(2, epic.getId());
         Assertions.assertEquals(Type.EPIC, epic.getType());
         Assertions.assertEquals("Epic1", epic.getTaskName());
         Assertions.assertEquals(Status.NEW, epic.getStatus());
-        Assertions.assertEquals("empty", epic.getTaskDescription());
+        Assertions.assertEquals("Empty", epic.getTaskDescription());
     }
 
     @Test
     void fromStringSubtaskTest() {
-        String taskString = "2,SUBTASK,Subtask1,NEW,empty,1";
+        String taskString = "3,SUBTASK,Subtask1,NEW,Empty,2024-06-26T02:00,PT9M,2";
         Task subtask = FileBackedTaskManager.fromString(taskString);
-        Assertions.assertEquals(2, subtask.getId());
+        Assertions.assertEquals(3, subtask.getId());
         Assertions.assertEquals(Type.SUBTASK, subtask.getType());
         Assertions.assertEquals("Subtask1", subtask.getTaskName());
         Assertions.assertEquals(Status.NEW, subtask.getStatus());
-        Assertions.assertEquals("empty", subtask.getTaskDescription());
+        Assertions.assertEquals("Empty", subtask.getTaskDescription());
+
+        LocalDateTime expectedStartTime = LocalDateTime.parse("2024-06-26T02:00",
+                DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+        LocalDateTime actualStartTime = subtask.getStartTime();
+        Assertions.assertEquals(expectedStartTime, actualStartTime);
+
+        Assertions.assertEquals("PT9M", subtask.getDuration().toString());
     }
 }

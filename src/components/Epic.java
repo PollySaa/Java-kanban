@@ -2,11 +2,12 @@ package components;
 
 import service.Type;
 
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.time.LocalDateTime;
+import java.util.*;
 
 public class Epic extends Task {
     private final HashMap<Integer, Subtask> subtasks = new HashMap<>();
+    private LocalDateTime endTime;
 
     public Epic(String taskName, String taskDescription) {
         super(taskName, taskDescription);
@@ -16,12 +17,20 @@ public class Epic extends Task {
         super(id, type, taskName, status, taskDescription);
     }
 
+    public Epic(Type type, String taskName, Status status, String taskDescription) {
+        super(type, taskName, status, taskDescription);
+    }
+
     public void addSubtasks(Subtask subtask) {
         subtasks.put(subtask.getId(), subtask);
     }
 
     public ArrayList<Subtask> getSubtasks() {
         return new ArrayList<>(subtasks.values());
+    }
+
+    public Set<Integer> getSubtasksKeys() {
+        return subtasks.keySet();
     }
 
     public void updateSubtasks(Subtask subtask) {
@@ -63,8 +72,18 @@ public class Epic extends Task {
     }
 
     @Override
+    public LocalDateTime getEndTime() {
+        return endTime;
+    }
+
+    public void setEndTime(LocalDateTime endTime) {
+        this.endTime = endTime;
+    }
+
+    @Override
     public String toString() {
-        return getId() + "," + getType() + "," + getTaskName() + "," + getStatus() + "," + getTaskDescription();
+        return getId() + "," + getType() + "," + getTaskName() + "," + getStatus() + "," + getTaskDescription() +
+                "," + getStartTime() + "," + getDuration() + "," + getEndTime();
     }
 }
 

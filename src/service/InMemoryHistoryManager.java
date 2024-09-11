@@ -13,6 +13,11 @@ public class InMemoryHistoryManager implements HistoryManager {
     private final Map<Integer, Node> historyTask = new HashMap<>();
 
     @Override
+    public void clear() {
+        historyTask.clear();
+    }
+
+    @Override
     public void add(Task task) {
         if (historyTask.containsKey(task.getId())) {
             removeNode(historyTask.get(task.getId()));
